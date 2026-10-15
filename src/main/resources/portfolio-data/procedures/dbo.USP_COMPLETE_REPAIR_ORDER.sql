@@ -1,0 +1,39 @@
+-- Procedure: dbo.USP_COMPLETE_REPAIR_ORDER
+-- Description: 정비 주문을 완료하고 결제를 확정한다
+-- Tables: TB_REPAIR_ORDER, TB_SERVICE_HISTORY, TB_VEHICLE, TB_INTERFACE_LOG, TB_PAYMENT, TB_COUPON, TB_COUPON_REDEMPTION
+CREATE PROCEDURE dbo.USP_COMPLETE_REPAIR_ORDER
+    @ORDER_NO varchar(20),
+    @HISTORY_NO varchar(24),
+    @SERVICE_DATE date,
+    @SUMMARY nvarchar(500),
+    @PAYMENT_NO varchar(24),
+    @COUPON_NO varchar(20),
+    @CUST_NO varchar(20),
+    @REDEMPTION_NO varchar(24),
+    @DISCOUNT_AMOUNT decimal(12,2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.TB_REPAIR_ORDER
+    SET ORDER_STATUS = 'COMPLETED',
+        CLOSED_AT = SYSUTCDATETIME()
+    WHERE ORDER_NO = @ORDER_NO
+      AND CLOSED_AT IS NULL;
+
+    IF @@ROWCOUNT = 0
+        THROW 50007, 'Repair order cannot be completed.', 1;
+
+    EXEC dbo.USP_LOAD_SERVICE_HISTORY
+        @HISTORY_NO = @HISTORY_NO,
+        @ORDER_NO = @ORDER_NO,
+        @SERVICE_DATE = @SERVICE_DATE,
+        @SUMMARY = @SUMMARY;
+
+    EXEC dbo.USP_CONFIRM_PAYMENT
+        @PAYMENT_NO = @PAYMENT_NO,
+        @COUPON_NO = @COUPON_NO,
+        @CUST_NO = @CUST_NO,
+        @REDEMPTION_NO = @REDEMPTION_NO,
+        @DISCOUNT_AMOUNT = @DISCOUNT_AMOUNT;
+END;

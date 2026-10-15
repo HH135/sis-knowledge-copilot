@@ -1,0 +1,51 @@
+-- Procedure: dbo.USP_ISSUE_PART
+-- Description: 정비 주문에 부품을 출고하고 재고 이력을 기록한다
+-- Tables: TB_INVENTORY, TB_INVENTORY_TXN, TB_REPAIR_ORDER, TB_PART
+CREATE PROCEDURE dbo.USP_ISSUE_PART
+    @TXN_NO varchar(24),
+    @PART_NO varchar(24),
+    @BRANCH_NO varchar(12),
+    @ORDER_NO varchar(20),
+    @QUANTITY decimal(12,2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRANSACTION;
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.TB_PART WHERE PART_NO = @PART_NO AND ACTIVE_YN = 'Y')
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50022, 'Active part was not found.', 1;
+    END;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM dbo.TB_REPAIR_ORDER
+        WHERE ORDER_NO = @ORDER_NO AND CLOSED_AT IS NULL
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50023, 'Open repair order was not found.', 1;
+    END;
+
+    UPDATE dbo.TB_INVENTORY
+    SET ON_HAND_QTY = ON_HAND_QTY - @QUANTITY,
+        UPDATED_AT = SYSUTCDATETIME()
+    WHERE PART_NO = @PART_NO
+      AND BRANCH_NO = @BRANCH_NO
+      AND ON_HAND_QTY - RESERVED_QTY >= @QUANTITY;
+
+    IF @@ROWCOUNT = 0
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50010, 'Insufficient available inventory.', 1;
+    END;
+
+    INSERT INTO dbo.TB_INVENTORY_TXN
+        (TXN_NO, PART_NO, BRANCH_NO, TXN_TYPE, QTY_CHANGE, ORDER_NO, CREATED_AT)
+    VALUES
+        (@TXN_NO, @PART_NO, @BRANCH_NO, 'ISSUE', -@QUANTITY, @ORDER_NO, SYSUTCDATETIME());
+
+    COMMIT TRANSACTION;
+END;
