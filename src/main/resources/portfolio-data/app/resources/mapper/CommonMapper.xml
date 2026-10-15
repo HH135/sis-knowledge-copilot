@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acme.svc.common.CommonDao">
+    <update id="writeLog" statementType="CALLABLE">
+        { call dbo.USP_WRITE_INTERFACE_LOG(1006, #{messageType}, #{correlationId}, #{status}, #{summary}) }
+    </update>
+    <update id="retryInterfaceLog" statementType="CALLABLE">
+        { call dbo.USP_RETRY_INTERFACE_SYNC(#{logNo}, #{correlationId}) }
+    </update>
+</mapper>

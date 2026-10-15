@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acme.svc.repairorder.RepairOrderDao">
+    <update id="create" statementType="CALLABLE">
+        { call dbo.USP_CREATE_REPAIR_ORDER(#{orderNo}, #{appointmentNo}) }
+    </update>
+    <update id="changeStatus" statementType="CALLABLE">
+        { call dbo.USP_CHANGE_ORDER_STATUS(#{orderNo}, #{status}) }
+    </update>
+    <update id="complete" statementType="CALLABLE">
+        { call dbo.USP_COMPLETE_REPAIR_ORDER(#{orderNo}, #{historyNo}, #{serviceDate}, #{summary}, #{paymentNo}, #{couponNo}, #{customerNo}, #{redemptionNo}, #{discountAmount}) }
+    </update>
+</mapper>
