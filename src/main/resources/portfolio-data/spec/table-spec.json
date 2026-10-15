@@ -1,0 +1,274 @@
+{
+  "database": "ACME_SVC",
+  "tables": [
+    {
+      "schema": "dbo",
+      "name": "TB_CUSTOMER",
+      "description": "고객 기본 정보",
+      "columns": [
+        {"name": "CUST_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "고객번호"},
+        {"name": "CUST_NAME", "ordinal": 2, "dataType": "nvarchar(100)", "nullable": false, "description": "고객명"},
+        {"name": "PHONE_NO", "ordinal": 3, "dataType": "varchar(30)", "nullable": true, "description": "연락처"},
+        {"name": "EMAIL_ADDR", "ordinal": 4, "dataType": "varchar(254)", "nullable": true, "description": "이메일 주소"},
+        {"name": "EMAIL_OPT_IN", "ordinal": 5, "dataType": "char(1)", "nullable": false, "description": "이메일 수신 동의"},
+        {"name": "POSTAL_CODE", "ordinal": 6, "dataType": "varchar(12)", "nullable": true, "description": "우편번호"},
+        {"name": "CREATED_AT", "ordinal": 7, "dataType": "datetime2", "nullable": false, "description": "등록 일시"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_VEHICLE",
+      "description": "고객 차량 정보",
+      "columns": [
+        {"name": "VIN", "ordinal": 1, "dataType": "varchar(32)", "nullable": false, "description": "차량 식별번호"},
+        {"name": "CUST_NO", "ordinal": 2, "dataType": "varchar(20)", "nullable": false, "description": "소유 고객번호"},
+        {"name": "MODEL_CODE", "ordinal": 3, "dataType": "varchar(20)", "nullable": false, "description": "차량 모델 코드"},
+        {"name": "MODEL_YEAR", "ordinal": 4, "dataType": "smallint", "nullable": true, "description": "모델 연도"},
+        {"name": "LICENSE_PLATE", "ordinal": 5, "dataType": "varchar(16)", "nullable": true, "description": "차량 등록번호"},
+        {"name": "ODOMETER_KM", "ordinal": 6, "dataType": "int", "nullable": false, "description": "누적 주행거리"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_REPAIR_ORDER",
+      "description": "정비 주문 헤더",
+      "columns": [
+        {"name": "ORDER_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "주문번호"},
+        {"name": "CUST_NO", "ordinal": 2, "dataType": "varchar(20)", "nullable": false, "description": "고객번호"},
+        {"name": "VIN", "ordinal": 3, "dataType": "varchar(32)", "nullable": false, "description": "차량 식별번호"},
+        {"name": "APPT_NO", "ordinal": 4, "dataType": "varchar(20)", "nullable": true, "description": "예약번호"},
+        {"name": "ORDER_STATUS", "ordinal": 5, "dataType": "varchar(16)", "nullable": false, "description": "정비 진행 상태"},
+        {"name": "OPENED_AT", "ordinal": 6, "dataType": "datetime2", "nullable": false, "description": "접수 일시"},
+        {"name": "CLOSED_AT", "ordinal": 7, "dataType": "datetime2", "nullable": true, "description": "완료 일시"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_REPAIR_TASK",
+      "description": "정비 주문 작업 항목",
+      "columns": [
+        {"name": "TASK_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "작업번호"},
+        {"name": "ORDER_NO", "ordinal": 2, "dataType": "varchar(20)", "nullable": false, "description": "주문번호"},
+        {"name": "TECH_NO", "ordinal": 3, "dataType": "varchar(20)", "nullable": true, "description": "담당 기술자번호"},
+        {"name": "TASK_CODE", "ordinal": 4, "dataType": "varchar(24)", "nullable": false, "description": "정비 작업 코드"},
+        {"name": "TASK_DESC", "ordinal": 5, "dataType": "nvarchar(240)", "nullable": false, "description": "작업 설명"},
+        {"name": "LABOR_MINUTES", "ordinal": 6, "dataType": "int", "nullable": true, "description": "예상 작업 시간"},
+        {"name": "TASK_STATUS", "ordinal": 7, "dataType": "varchar(16)", "nullable": false, "description": "작업 상태"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_PART",
+      "description": "정비 부품 기준 정보",
+      "columns": [
+        {"name": "PART_NO", "ordinal": 1, "dataType": "varchar(24)", "nullable": false, "description": "부품번호"},
+        {"name": "PART_NAME", "ordinal": 2, "dataType": "nvarchar(120)", "nullable": false, "description": "부품명"},
+        {"name": "PART_CATEGORY", "ordinal": 3, "dataType": "varchar(24)", "nullable": false, "description": "부품 분류"},
+        {"name": "UNIT_CODE", "ordinal": 4, "dataType": "varchar(12)", "nullable": false, "description": "재고 단위"},
+        {"name": "UNIT_PRICE", "ordinal": 5, "dataType": "decimal(12,2)", "nullable": false, "description": "기준 단가"},
+        {"name": "ACTIVE_YN", "ordinal": 6, "dataType": "char(1)", "nullable": false, "description": "사용 여부"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_INVENTORY",
+      "description": "지점별 부품 재고",
+      "columns": [
+        {"name": "BRANCH_NO", "ordinal": 1, "dataType": "varchar(12)", "nullable": false, "description": "정비 지점번호"},
+        {"name": "PART_NO", "ordinal": 2, "dataType": "varchar(24)", "nullable": false, "description": "부품번호"},
+        {"name": "ON_HAND_QTY", "ordinal": 3, "dataType": "decimal(12,2)", "nullable": false, "description": "현재 재고 수량"},
+        {"name": "RESERVED_QTY", "ordinal": 4, "dataType": "decimal(12,2)", "nullable": false, "description": "예약 재고 수량"},
+        {"name": "REORDER_POINT", "ordinal": 5, "dataType": "decimal(12,2)", "nullable": false, "description": "재주문 기준 수량"},
+        {"name": "UPDATED_AT", "ordinal": 6, "dataType": "datetime2", "nullable": false, "description": "재고 변경 일시"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_INVENTORY_TXN",
+      "description": "부품 재고 변동 이력",
+      "columns": [
+        {"name": "TXN_NO", "ordinal": 1, "dataType": "varchar(24)", "nullable": false, "description": "재고 거래번호"},
+        {"name": "PART_NO", "ordinal": 2, "dataType": "varchar(24)", "nullable": false, "description": "부품번호"},
+        {"name": "BRANCH_NO", "ordinal": 3, "dataType": "varchar(12)", "nullable": false, "description": "정비 지점번호"},
+        {"name": "TXN_TYPE", "ordinal": 4, "dataType": "varchar(16)", "nullable": false, "description": "재고 거래 유형"},
+        {"name": "QTY_CHANGE", "ordinal": 5, "dataType": "decimal(12,2)", "nullable": false, "description": "수량 변동"},
+        {"name": "ORDER_NO", "ordinal": 6, "dataType": "varchar(20)", "nullable": true, "description": "관련 주문번호"},
+        {"name": "CREATED_AT", "ordinal": 7, "dataType": "datetime2", "nullable": false, "description": "거래 일시"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_ESTIMATE",
+      "description": "정비 견적 헤더",
+      "columns": [
+        {"name": "ESTIMATE_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "견적번호"},
+        {"name": "ORDER_NO", "ordinal": 2, "dataType": "varchar(20)", "nullable": false, "description": "주문번호"},
+        {"name": "ESTIMATE_STATUS", "ordinal": 3, "dataType": "varchar(16)", "nullable": false, "description": "견적 상태"},
+        {"name": "LABOR_AMOUNT", "ordinal": 4, "dataType": "decimal(14,2)", "nullable": false, "description": "공임 금액"},
+        {"name": "PART_AMOUNT", "ordinal": 5, "dataType": "decimal(14,2)", "nullable": false, "description": "부품 금액"},
+        {"name": "TOTAL_AMOUNT", "ordinal": 6, "dataType": "decimal(14,2)", "nullable": false, "description": "총 견적 금액"},
+        {"name": "CREATED_AT", "ordinal": 7, "dataType": "datetime2", "nullable": false, "description": "견적 작성 일시"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_ESTIMATE_LINE",
+      "description": "정비 견적 상세 항목",
+      "columns": [
+        {"name": "ESTIMATE_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "견적번호"},
+        {"name": "LINE_NO", "ordinal": 2, "dataType": "smallint", "nullable": false, "description": "견적 행 번호"},
+        {"name": "LINE_TYPE", "ordinal": 3, "dataType": "varchar(12)", "nullable": false, "description": "견적 항목 유형"},
+        {"name": "TASK_CODE", "ordinal": 4, "dataType": "varchar(24)", "nullable": true, "description": "정비 작업 코드"},
+        {"name": "PART_NO", "ordinal": 5, "dataType": "varchar(24)", "nullable": true, "description": "부품번호"},
+        {"name": "QUANTITY", "ordinal": 6, "dataType": "decimal(10,2)", "nullable": false, "description": "수량"},
+        {"name": "LINE_AMOUNT", "ordinal": 7, "dataType": "decimal(14,2)", "nullable": false, "description": "항목 금액"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_PAYMENT",
+      "description": "정비 주문 결제 내역",
+      "columns": [
+        {"name": "PAYMENT_NO", "ordinal": 1, "dataType": "varchar(24)", "nullable": false, "description": "결제번호"},
+        {"name": "ORDER_NO", "ordinal": 2, "dataType": "varchar(20)", "nullable": false, "description": "주문번호"},
+        {"name": "PAYMENT_METHOD", "ordinal": 3, "dataType": "varchar(16)", "nullable": false, "description": "결제 수단"},
+        {"name": "PAYMENT_AMOUNT", "ordinal": 4, "dataType": "decimal(14,2)", "nullable": false, "description": "결제 금액"},
+        {"name": "PAYMENT_STATUS", "ordinal": 5, "dataType": "varchar(16)", "nullable": false, "description": "결제 상태"},
+        {"name": "PAID_AT", "ordinal": 6, "dataType": "datetime2", "nullable": true, "description": "결제 완료 일시"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_COUPON",
+      "description": "정비 할인 쿠폰 정보",
+      "columns": [
+        {"name": "COUPON_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "쿠폰번호"},
+        {"name": "COUPON_NAME", "ordinal": 2, "dataType": "nvarchar(100)", "nullable": false, "description": "쿠폰명"},
+        {"name": "DISCOUNT_TYPE", "ordinal": 3, "dataType": "varchar(12)", "nullable": false, "description": "할인 유형"},
+        {"name": "DISCOUNT_VALUE", "ordinal": 4, "dataType": "decimal(10,2)", "nullable": false, "description": "할인 값"},
+        {"name": "VALID_FROM", "ordinal": 5, "dataType": "date", "nullable": false, "description": "사용 시작일"},
+        {"name": "VALID_TO", "ordinal": 6, "dataType": "date", "nullable": false, "description": "사용 종료일"},
+        {"name": "ACTIVE_YN", "ordinal": 7, "dataType": "char(1)", "nullable": false, "description": "사용 가능 여부"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_COUPON_REDEMPTION",
+      "description": "주문별 쿠폰 사용 내역",
+      "columns": [
+        {"name": "REDEMPTION_NO", "ordinal": 1, "dataType": "varchar(24)", "nullable": false, "description": "쿠폰 사용번호"},
+        {"name": "COUPON_NO", "ordinal": 2, "dataType": "varchar(20)", "nullable": false, "description": "쿠폰번호"},
+        {"name": "ORDER_NO", "ordinal": 3, "dataType": "varchar(20)", "nullable": false, "description": "주문번호"},
+        {"name": "CUST_NO", "ordinal": 4, "dataType": "varchar(20)", "nullable": false, "description": "고객번호"},
+        {"name": "DISCOUNT_AMOUNT", "ordinal": 5, "dataType": "decimal(12,2)", "nullable": false, "description": "할인 적용 금액"},
+        {"name": "REDEEMED_AT", "ordinal": 6, "dataType": "datetime2", "nullable": false, "description": "쿠폰 사용 일시"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_TECHNICIAN",
+      "description": "정비 기술자 정보",
+      "columns": [
+        {"name": "TECH_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "기술자번호"},
+        {"name": "TECH_NAME", "ordinal": 2, "dataType": "nvarchar(80)", "nullable": false, "description": "기술자명"},
+        {"name": "BRANCH_NO", "ordinal": 3, "dataType": "varchar(12)", "nullable": false, "description": "정비 지점번호"},
+        {"name": "SKILL_LEVEL", "ordinal": 4, "dataType": "varchar(16)", "nullable": false, "description": "기술 등급"},
+        {"name": "HIRE_DATE", "ordinal": 5, "dataType": "date", "nullable": false, "description": "입사일"},
+        {"name": "ACTIVE_YN", "ordinal": 6, "dataType": "char(1)", "nullable": false, "description": "근무 여부"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_APPOINTMENT",
+      "description": "차량 정비 예약",
+      "columns": [
+        {"name": "APPT_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "예약번호"},
+        {"name": "CUST_NO", "ordinal": 2, "dataType": "varchar(20)", "nullable": false, "description": "고객번호"},
+        {"name": "VIN", "ordinal": 3, "dataType": "varchar(32)", "nullable": false, "description": "차량 식별번호"},
+        {"name": "BAY_NO", "ordinal": 4, "dataType": "varchar(12)", "nullable": true, "description": "정비 베이번호"},
+        {"name": "APPT_AT", "ordinal": 5, "dataType": "datetime2", "nullable": false, "description": "예약 일시"},
+        {"name": "APPT_STATUS", "ordinal": 6, "dataType": "varchar(16)", "nullable": false, "description": "예약 상태"},
+        {"name": "REQUEST_NOTE", "ordinal": 7, "dataType": "nvarchar(500)", "nullable": true, "description": "고객 요청 사항"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_SERVICE_BAY",
+      "description": "정비 지점 작업 베이",
+      "columns": [
+        {"name": "BAY_NO", "ordinal": 1, "dataType": "varchar(12)", "nullable": false, "description": "정비 베이번호"},
+        {"name": "BRANCH_NO", "ordinal": 2, "dataType": "varchar(12)", "nullable": false, "description": "정비 지점번호"},
+        {"name": "BAY_NAME", "ordinal": 3, "dataType": "nvarchar(60)", "nullable": false, "description": "베이명"},
+        {"name": "BAY_TYPE", "ordinal": 4, "dataType": "varchar(16)", "nullable": false, "description": "베이 유형"},
+        {"name": "ACTIVE_YN", "ordinal": 5, "dataType": "char(1)", "nullable": false, "description": "사용 여부"},
+        {"name": "UPDATED_AT", "ordinal": 6, "dataType": "datetime2", "nullable": false, "description": "변경 일시"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_SUPPLIER",
+      "description": "부품 공급 업체 정보",
+      "columns": [
+        {"name": "SUPPLIER_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "공급업체번호"},
+        {"name": "SUPPLIER_NAME", "ordinal": 2, "dataType": "nvarchar(120)", "nullable": false, "description": "공급업체명"},
+        {"name": "CONTACT_NAME", "ordinal": 3, "dataType": "nvarchar(80)", "nullable": true, "description": "담당자명"},
+        {"name": "PHONE_NO", "ordinal": 4, "dataType": "varchar(20)", "nullable": true, "description": "연락처"},
+        {"name": "ACTIVE_YN", "ordinal": 5, "dataType": "char(1)", "nullable": false, "description": "거래 여부"},
+        {"name": "CREATED_AT", "ordinal": 6, "dataType": "datetime2", "nullable": false, "description": "등록 일시"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_PART_PURCHASE_ORDER",
+      "description": "부품 구매 주문 헤더",
+      "columns": [
+        {"name": "PO_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "구매 주문번호"},
+        {"name": "SUPPLIER_NO", "ordinal": 2, "dataType": "varchar(20)", "nullable": false, "description": "공급업체번호"},
+        {"name": "BRANCH_NO", "ordinal": 3, "dataType": "varchar(12)", "nullable": false, "description": "정비 지점번호"},
+        {"name": "PO_STATUS", "ordinal": 4, "dataType": "varchar(16)", "nullable": false, "description": "구매 주문 상태"},
+        {"name": "ORDERED_AT", "ordinal": 5, "dataType": "datetime2", "nullable": false, "description": "발주 일시"},
+        {"name": "EXPECTED_AT", "ordinal": 6, "dataType": "date", "nullable": true, "description": "입고 예정일"},
+        {"name": "TOTAL_AMOUNT", "ordinal": 7, "dataType": "decimal(14,2)", "nullable": false, "description": "발주 총액"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_PART_PURCHASE_LINE",
+      "description": "부품 구매 주문 상세",
+      "columns": [
+        {"name": "PO_NO", "ordinal": 1, "dataType": "varchar(20)", "nullable": false, "description": "구매 주문번호"},
+        {"name": "LINE_NO", "ordinal": 2, "dataType": "smallint", "nullable": false, "description": "주문 행 번호"},
+        {"name": "PART_NO", "ordinal": 3, "dataType": "varchar(24)", "nullable": false, "description": "부품번호"},
+        {"name": "ORDER_QTY", "ordinal": 4, "dataType": "decimal(12,2)", "nullable": false, "description": "발주 수량"},
+        {"name": "UNIT_PRICE", "ordinal": 5, "dataType": "decimal(12,2)", "nullable": false, "description": "구매 단가"},
+        {"name": "RECEIVED_QTY", "ordinal": 6, "dataType": "decimal(12,2)", "nullable": false, "description": "입고 수량"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_SERVICE_HISTORY",
+      "description": "차량 정비 이력",
+      "columns": [
+        {"name": "HISTORY_NO", "ordinal": 1, "dataType": "varchar(24)", "nullable": false, "description": "정비 이력번호"},
+        {"name": "VIN", "ordinal": 2, "dataType": "varchar(32)", "nullable": false, "description": "차량 식별번호"},
+        {"name": "ORDER_NO", "ordinal": 3, "dataType": "varchar(20)", "nullable": false, "description": "주문번호"},
+        {"name": "SERVICE_DATE", "ordinal": 4, "dataType": "date", "nullable": false, "description": "정비 일자"},
+        {"name": "ODOMETER_KM", "ordinal": 5, "dataType": "int", "nullable": false, "description": "정비 시 주행거리"},
+        {"name": "SUMMARY", "ordinal": 6, "dataType": "nvarchar(500)", "nullable": false, "description": "정비 요약"}
+      ]
+    },
+    {
+      "schema": "dbo",
+      "name": "TB_INTERFACE_LOG",
+      "description": "가상 연동 메시지 처리 이력",
+      "columns": [
+        {"name": "LOG_NO", "ordinal": 1, "dataType": "bigint", "nullable": false, "description": "로그 번호"},
+        {"name": "MESSAGE_TYPE", "ordinal": 2, "dataType": "varchar(24)", "nullable": false, "description": "메시지 유형"},
+        {"name": "CORRELATION_ID", "ordinal": 3, "dataType": "varchar(40)", "nullable": false, "description": "연관 식별자"},
+        {"name": "PROCESS_STATUS", "ordinal": 4, "dataType": "varchar(16)", "nullable": false, "description": "처리 상태"},
+        {"name": "PAYLOAD_SUMMARY", "ordinal": 5, "dataType": "nvarchar(500)", "nullable": true, "description": "가상 메시지 요약"},
+        {"name": "CREATED_AT", "ordinal": 6, "dataType": "datetime2", "nullable": false, "description": "로그 생성 일시"}
+      ]
+    }
+  ]
+}

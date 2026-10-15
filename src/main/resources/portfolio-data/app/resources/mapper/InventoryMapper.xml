@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acme.svc.inventory.InventoryDao">
+    <update id="issue" statementType="CALLABLE">
+        { call dbo.USP_ISSUE_PART(#{transactionNo}, #{partNo}, #{branchNo}, #{orderNo}, #{quantity}) }
+    </update>
+</mapper>

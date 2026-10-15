@@ -1,0 +1,63 @@
+-- Procedure: dbo.USP_RECEIVE_PART_PURCHASE_ORDER
+-- Description: 구매 부품을 입고하고 재고와 거래 이력을 갱신한다
+-- Tables: TB_PART_PURCHASE_ORDER, TB_PART_PURCHASE_LINE, TB_INVENTORY, TB_INVENTORY_TXN
+CREATE PROCEDURE dbo.USP_RECEIVE_PART_PURCHASE_ORDER
+    @PO_NO varchar(20),
+    @LINE_NO smallint,
+    @TXN_NO varchar(24),
+    @RECEIVED_QTY decimal(12,2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    DECLARE @PART_NO varchar(24);
+    DECLARE @BRANCH_NO varchar(12);
+
+    BEGIN TRANSACTION;
+
+    SELECT @PART_NO = l.PART_NO,
+           @BRANCH_NO = p.BRANCH_NO
+    FROM dbo.TB_PART_PURCHASE_LINE AS l
+    INNER JOIN dbo.TB_PART_PURCHASE_ORDER AS p ON p.PO_NO = l.PO_NO
+    WHERE l.PO_NO = @PO_NO
+      AND l.LINE_NO = @LINE_NO
+      AND p.PO_STATUS IN ('OPEN', 'PARTIAL');
+
+    IF @PART_NO IS NULL
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50019, 'Open purchase order line was not found.', 1;
+    END;
+
+    UPDATE dbo.TB_PART_PURCHASE_LINE
+    SET RECEIVED_QTY = RECEIVED_QTY + @RECEIVED_QTY
+    WHERE PO_NO = @PO_NO
+      AND LINE_NO = @LINE_NO
+      AND RECEIVED_QTY + @RECEIVED_QTY <= ORDER_QTY;
+
+    IF @@ROWCOUNT = 0
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50020, 'Received quantity exceeds the ordered quantity.', 1;
+    END;
+
+    UPDATE dbo.TB_INVENTORY
+    SET ON_HAND_QTY = ON_HAND_QTY + @RECEIVED_QTY,
+        UPDATED_AT = SYSUTCDATETIME()
+    WHERE PART_NO = @PART_NO
+      AND BRANCH_NO = @BRANCH_NO;
+
+    IF @@ROWCOUNT = 0
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50021, 'Inventory record was not found.', 1;
+    END;
+
+    INSERT INTO dbo.TB_INVENTORY_TXN
+        (TXN_NO, PART_NO, BRANCH_NO, TXN_TYPE, QTY_CHANGE, ORDER_NO, CREATED_AT)
+    VALUES
+        (@TXN_NO, @PART_NO, @BRANCH_NO, 'RECEIPT', @RECEIVED_QTY, NULL, SYSUTCDATETIME());
+
+    COMMIT TRANSACTION;
+END;

@@ -1,0 +1,30 @@
+-- Procedure: dbo.USP_LOAD_SERVICE_HISTORY
+-- Description: 완료 주문을 차량 정비 이력에 반영한다
+-- Tables: TB_REPAIR_ORDER, TB_SERVICE_HISTORY, TB_VEHICLE
+CREATE PROCEDURE dbo.USP_LOAD_SERVICE_HISTORY
+    @HISTORY_NO varchar(24),
+    @ORDER_NO varchar(20),
+    @SERVICE_DATE date,
+    @SUMMARY nvarchar(500)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.TB_SERVICE_HISTORY
+        (HISTORY_NO, VIN, ORDER_NO, SERVICE_DATE, ODOMETER_KM, SUMMARY)
+    SELECT @HISTORY_NO, o.VIN, o.ORDER_NO, @SERVICE_DATE, v.ODOMETER_KM, @SUMMARY
+    FROM dbo.TB_REPAIR_ORDER AS o
+    INNER JOIN dbo.TB_VEHICLE AS v ON v.VIN = o.VIN
+    WHERE o.ORDER_NO = @ORDER_NO
+      AND o.ORDER_STATUS = 'COMPLETED';
+
+    IF @@ROWCOUNT = 0
+        THROW 50016, 'Completed order or vehicle was not found.', 1;
+
+    EXEC dbo.USP_WRITE_INTERFACE_LOG
+        @LOG_NO = 1004,
+        @MESSAGE_TYPE = 'HISTORY_LOADED',
+        @CORRELATION_ID = @ORDER_NO,
+        @PROCESS_STATUS = 'DONE',
+        @PAYLOAD_SUMMARY = N'Service history loaded';
+END;

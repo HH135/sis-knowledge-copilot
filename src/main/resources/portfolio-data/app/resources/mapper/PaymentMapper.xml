@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acme.svc.payment.PaymentDao">
+    <update id="register" statementType="CALLABLE">
+        { call dbo.USP_REGISTER_PAYMENT(#{paymentNo}, #{orderNo}, #{method}, #{amount}) }
+    </update>
+    <update id="confirm" statementType="CALLABLE">
+        { call dbo.USP_CONFIRM_PAYMENT(#{paymentNo}, #{couponNo}, #{customerNo}, #{redemptionNo}, 0) }
+    </update>
+    <update id="cancel" statementType="CALLABLE">
+        { call dbo.USP_CANCEL_PAYMENT(#{paymentNo}) }
+    </update>
+    <update id="cancelCouponRedemption" statementType="CALLABLE">
+        { call dbo.USP_CANCEL_COUPON_REDEMPTION(#{redemptionNo}) }
+    </update>
+</mapper>

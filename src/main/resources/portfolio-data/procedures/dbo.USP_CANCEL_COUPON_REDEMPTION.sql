@@ -1,0 +1,15 @@
+-- Procedure: dbo.USP_CANCEL_COUPON_REDEMPTION
+-- Description: 정비 주문의 쿠폰 사용을 취소한다
+-- Tables: TB_COUPON_REDEMPTION
+CREATE PROCEDURE dbo.USP_CANCEL_COUPON_REDEMPTION
+    @REDEMPTION_NO varchar(24)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM dbo.TB_COUPON_REDEMPTION
+    WHERE REDEMPTION_NO = @REDEMPTION_NO;
+
+    IF @@ROWCOUNT = 0
+        THROW 50015, 'Coupon redemption was not found.', 1;
+END;

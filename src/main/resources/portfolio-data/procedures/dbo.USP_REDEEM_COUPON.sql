@@ -1,0 +1,33 @@
+-- Procedure: dbo.USP_REDEEM_COUPON
+-- Description: 유효한 쿠폰을 정비 주문에 사용 처리한다
+-- Tables: TB_COUPON, TB_COUPON_REDEMPTION
+CREATE PROCEDURE dbo.USP_REDEEM_COUPON
+    @REDEMPTION_NO varchar(24),
+    @COUPON_NO varchar(20),
+    @ORDER_NO varchar(20),
+    @CUST_NO varchar(20),
+    @DISCOUNT_AMOUNT decimal(12,2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM dbo.TB_COUPON
+        WHERE COUPON_NO = @COUPON_NO
+          AND ACTIVE_YN = 'Y'
+          AND CAST(SYSUTCDATETIME() AS date) BETWEEN VALID_FROM AND VALID_TO
+    )
+        THROW 50014, 'Coupon is not valid.', 1;
+
+    INSERT INTO dbo.TB_COUPON_REDEMPTION
+        (REDEMPTION_NO, COUPON_NO, ORDER_NO, CUST_NO, DISCOUNT_AMOUNT, REDEEMED_AT)
+    VALUES
+        (@REDEMPTION_NO, @COUPON_NO, @ORDER_NO, @CUST_NO, @DISCOUNT_AMOUNT, SYSUTCDATETIME());
+
+    EXEC dbo.USP_WRITE_INTERFACE_LOG
+        @LOG_NO = 1003,
+        @MESSAGE_TYPE = 'COUPON_REDEEMED',
+        @CORRELATION_ID = @ORDER_NO,
+        @PROCESS_STATUS = 'DONE',
+        @PAYLOAD_SUMMARY = N'Coupon redeemed';
+END;
