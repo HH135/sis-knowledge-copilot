@@ -1,6 +1,7 @@
 package io.github.hyun.sis_app_intelligence.document;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +34,11 @@ class EmbeddingIntegrationTest {
         insertChunk("service", "Repair service workflow", "The repair service assigns work to technicians.");
         insertChunk("inventory", "Parts inventory", "Inventory records part quantities and stock movements.");
         insertChunk("payment", "Payment processing", "Payment records settle completed repair orders.");
+    }
+
+    @AfterEach
+    void removePortfolioChunksCreatedByTest() {
+        jdbcTemplate.update("DELETE FROM document_chunk WHERE origin = 'portfolio'");
     }
 
     @Test
