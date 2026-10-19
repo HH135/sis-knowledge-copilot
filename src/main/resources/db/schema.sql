@@ -82,3 +82,22 @@ CREATE INDEX IF NOT EXISTS ix_meta_proc_name_trgm
 ALTER TABLE meta_proc ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE meta_proc ADD COLUMN IF NOT EXISTS source_ref TEXT;
 ALTER TABLE meta_proc ADD COLUMN IF NOT EXISTS definition_status VARCHAR(20) NOT NULL DEFAULT 'OK';
+
+CREATE TABLE IF NOT EXISTS proc_dependency (
+    id BIGSERIAL PRIMARY KEY,
+    origin VARCHAR(20) NOT NULL,
+    caller_type VARCHAR(20) NOT NULL,
+    caller_ref TEXT NOT NULL,
+    callee_schema VARCHAR(128) NOT NULL DEFAULT 'dbo',
+    callee_name VARCHAR(256) NOT NULL,
+    call_type VARCHAR(20) NOT NULL,
+    line_no INT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE NULLS NOT DISTINCT
+        (origin, caller_type, caller_ref, callee_schema, callee_name, line_no)
+);
+
+CREATE INDEX IF NOT EXISTS ix_proc_dependency_origin_callee
+    ON proc_dependency (origin, callee_name);
+CREATE INDEX IF NOT EXISTS ix_proc_dependency_origin_caller
+    ON proc_dependency (origin, caller_ref);
