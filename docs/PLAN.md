@@ -157,7 +157,9 @@ References: [Spring AI Getting Started](https://docs.spring.io/spring-ai/referen
 
 ### Day 2
 
-Create `AiAnalysisPort` and `MockAiAnalysisAdapter`; chunk Java/JSP by source unit and procedures by procedure block while preserving citation metadata. Use pgvector only for portfolio data, with DDL isolated in `schema-vector.sql`. Test Spring AI dependencies against Boot 4.1.1 before adopting the starter. Until an approved provider and credential exist, do not claim real semantic embeddings; preserve the Mock/port seam.
+`AiAnalysisPort` and `MockAiAnalysisAdapter` are implemented. The embedding task adds a deterministic 768-dimensional Mock adapter and an opt-in Google Gemini adapter using Spring `RestClient` (no Spring AI dependency). Portfolio-only `schema-vector.sql` contains the `document_chunk` prerequisite, `chunk_embedding`, and cosine HNSW index; internal/default profiles do not load vector DDL. Rebuild and similar-search endpoints are portfolio-only. No chunking workflow or RAG answer generation is included yet. Gemini request fields are nested under `embedContentConfig` per the official REST schema; a live provider call remains unverified.
+
+Next Day 2 work: chunk Java/JSP by source unit and procedures by procedure block while preserving citation metadata, then connect chunk creation to embeddings.
 
 ### Day 3
 
