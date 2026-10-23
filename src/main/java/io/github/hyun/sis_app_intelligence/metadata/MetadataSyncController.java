@@ -27,5 +27,13 @@ public class MetadataSyncController {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(Map.of("error", "METADATA_SOURCE_NOT_CONFIGURED"));
         }
+        catch (MssqlNotConfiguredException exception) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("error", "MSSQL_NOT_CONFIGURED"));
+        }
+        catch (MssqlUnavailableException exception) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(Map.of("error", "MSSQL_UNAVAILABLE"));
+        }
     }
 }

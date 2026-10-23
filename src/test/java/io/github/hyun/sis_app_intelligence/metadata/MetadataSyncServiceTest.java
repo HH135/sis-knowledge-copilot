@@ -28,7 +28,7 @@ class MetadataSyncServiceTest {
                         new TableMeta("dbo", "TB_TWO", "둘째 테이블",
                                 List.of(new ColumnMeta("CODE", 1, "varchar(10)", false, "코드")))),
                 List.of(new ProcedureMeta("dbo", "USP_SAMPLE", "샘플 프로시저", "CREATE PROCEDURE ...",
-                        "portfolio-data/procedures/dbo.USP_SAMPLE.sql")));
+                        "portfolio-data/procedures/dbo.USP_SAMPLE.sql", "OK")));
 
         when(sourceProvider.getIfAvailable()).thenReturn(source);
         when(source.load()).thenReturn(snapshot);

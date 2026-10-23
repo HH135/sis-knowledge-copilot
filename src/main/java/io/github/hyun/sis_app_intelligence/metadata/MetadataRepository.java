@@ -50,15 +50,16 @@ public class MetadataRepository {
             jdbcTemplate.update(
                     """
                     INSERT INTO meta_proc
-                        (database_name, schema_name, procedure_name, definition, description, source_ref)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                        (database_name, schema_name, procedure_name, definition, description, source_ref, definition_status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                     """,
                     databaseName,
                     procedure.schemaName(),
                     procedure.procedureName(),
                     procedure.definition(),
                     procedure.description(),
-                    procedure.sourceRef());
+                        procedure.sourceRef(),
+                        procedure.definitionStatus());
         }
     }
 }

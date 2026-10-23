@@ -6,6 +6,7 @@ public record ProcedureSearchItem(
         String procedureName,
         String description,
         String sourceRef,
+        String definitionStatus,
         String matchedIn
 ) {
 }

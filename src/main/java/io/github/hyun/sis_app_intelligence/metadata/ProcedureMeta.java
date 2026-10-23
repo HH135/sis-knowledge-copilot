@@ -5,6 +5,15 @@ public record ProcedureMeta(
         String procedureName,
         String description,
         String definition,
-        String sourceRef
+        String sourceRef,
+        String definitionStatus
 ) {
+    public ProcedureMeta(
+            String schemaName,
+            String procedureName,
+            String description,
+            String definition,
+            String sourceRef) {
+        this(schemaName, procedureName, description, definition, sourceRef, "OK");
+    }
 }

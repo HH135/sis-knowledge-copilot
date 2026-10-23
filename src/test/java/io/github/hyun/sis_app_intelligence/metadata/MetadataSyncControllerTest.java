@@ -27,7 +27,7 @@ class MetadataSyncControllerTest {
                 List.of(new TableMeta("dbo", "TB_CUSTOMER", "고객",
                         List.of(new ColumnMeta("CUST_NO", 1, "varchar(20)", false, "고객번호")))),
                 List.of(new ProcedureMeta("dbo", "USP_SAMPLE", "샘플", "CREATE PROCEDURE ...",
-                        "portfolio-data/procedures/dbo.USP_SAMPLE.sql"))));
+                        "portfolio-data/procedures/dbo.USP_SAMPLE.sql", "OK"))));
         MockMvc mockMvc = standaloneSetup(new MetadataSyncController(
                 new MetadataSyncService(sourceProvider, repository))).build();
 

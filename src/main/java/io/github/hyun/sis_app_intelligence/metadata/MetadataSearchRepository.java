@@ -1,6 +1,7 @@
 package io.github.hyun.sis_app_intelligence.metadata;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -68,6 +69,7 @@ public class MetadataSearchRepository {
                        p.procedure_name,
                        p.description,
                        p.source_ref,
+                       p.definition_status,
                        CASE
                            WHEN p.procedure_name ILIKE search.exact_pattern ESCAPE '\\' THEN 'name'
                            WHEN COALESCE(p.description, '') ILIKE search.exact_pattern ESCAPE '\\' THEN 'description'
@@ -96,7 +98,8 @@ public class MetadataSearchRepository {
                    OR COALESCE(p.description, '') ILIKE search.contains_pattern ESCAPE '\\'
                    OR (search.search_body AND COALESCE(p.definition, '') ILIKE search.contains_pattern ESCAPE '\\')
             )
-            SELECT database_name, schema_name, procedure_name, description, source_ref, matched_in
+            SELECT database_name, schema_name, procedure_name, description, source_ref,
+                   definition_status, matched_in
             FROM matches
             ORDER BY match_rank, procedure_name
             LIMIT ?
@@ -121,6 +124,7 @@ public class MetadataSearchRepository {
                     resultSet.getString("procedure_name"),
                     resultSet.getString("description"),
                     resultSet.getString("source_ref"),
+                    resultSet.getString("definition_status"),
                     resultSet.getString("matched_in"));
 
     private final JdbcTemplate jdbcTemplate;
@@ -139,5 +143,20 @@ public class MetadataSearchRepository {
                                                       String containsPattern, boolean searchBody, int limit) {
         return jdbcTemplate.query(PROCEDURE_SEARCH_SQL, PROCEDURE_ROW_MAPPER,
                 exactPattern, prefixPattern, containsPattern, searchBody, limit);
+    }
+
+    public Optional<ProcedureSource> findProcedureSource(String schemaName, String procedureName) {
+        List<ProcedureSource> results = jdbcTemplate.query("""
+                SELECT schema_name, procedure_name, description, source_ref, definition_status, definition
+                FROM meta_proc
+                WHERE lower(schema_name) = lower(?) AND lower(procedure_name) = lower(?)
+                """, (resultSet, rowNum) -> new ProcedureSource(
+                resultSet.getString("schema_name"),
+                resultSet.getString("procedure_name"),
+                resultSet.getString("description"),
+                resultSet.getString("source_ref"),
+                resultSet.getString("definition_status"),
+                resultSet.getString("definition")), schemaName, procedureName);
+        return results.stream().findFirst();
     }
 }
