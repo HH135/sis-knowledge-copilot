@@ -1,0 +1,105 @@
+{
+  "version": "1.0.0",
+  "questions": [
+    {
+      "id": "appointment-registration",
+      "query": "AppointmentService register appointment customer VIN",
+      "expectedSources": ["portfolio-data/app/java/com/acme/svc/appointment/AppointmentService.java"]
+    },
+    {
+      "id": "appointment-validation",
+      "query": "AppointmentInputValidator validate appointment number customer VIN",
+      "expectedSources": ["portfolio-data/app/java/com/acme/svc/appointment/AppointmentInputValidator.java"]
+    },
+    {
+      "id": "appointment-mapper-registration",
+      "query": "AppointmentMapper register appointment CALLABLE",
+      "expectedSources": ["portfolio-data/app/resources/mapper/AppointmentMapper.xml#register"]
+    },
+    {
+      "id": "repair-order-completion",
+      "query": "USP_COMPLETE_REPAIR_ORDER close order service history payment",
+      "expectedSources": ["portfolio-data/procedures/dbo.USP_COMPLETE_REPAIR_ORDER.sql"]
+    },
+    {
+      "id": "payment-confirmation",
+      "query": "USP_CONFIRM_PAYMENT payment coupon redemption discount",
+      "expectedSources": ["portfolio-data/procedures/dbo.USP_CONFIRM_PAYMENT.sql"]
+    },
+    {
+      "id": "coupon-redemption",
+      "query": "USP_REDEEM_COUPON coupon discount redemption",
+      "expectedSources": ["portfolio-data/procedures/dbo.USP_REDEEM_COUPON.sql"]
+    },
+    {
+      "id": "estimate-approval",
+      "query": "USP_APPROVE_ESTIMATE estimate status approval",
+      "expectedSources": ["portfolio-data/procedures/dbo.USP_APPROVE_ESTIMATE.sql"]
+    },
+    {
+      "id": "part-issue",
+      "query": "USP_ISSUE_PART inventory quantity repair order",
+      "expectedSources": ["portfolio-data/procedures/dbo.USP_ISSUE_PART.sql"]
+    },
+    {
+      "id": "interface-retry",
+      "query": "USP_RETRY_INTERFACE_SYNC retry interface event",
+      "expectedSources": ["portfolio-data/procedures/dbo.USP_RETRY_INTERFACE_SYNC.sql"]
+    },
+    {
+      "id": "repair-order-metadata",
+      "query": "TB_REPAIR_ORDER ORDER_NO ORDER_STATUS CLOSED_AT",
+      "expectedSources": ["dbo.TB_REPAIR_ORDER"]
+    },
+    {
+      "id": "inventory-metadata",
+      "query": "TB_INVENTORY ON_HAND_QTY RESERVED_QTY REORDER_POINT",
+      "expectedSources": ["dbo.TB_INVENTORY"]
+    },
+    {
+      "id": "payment-metadata",
+      "query": "TB_PAYMENT PAYMENT_METHOD PAYMENT_AMOUNT PAYMENT_STATUS",
+      "expectedSources": ["dbo.TB_PAYMENT"]
+    },
+    {
+      "id": "coupon-redemption-metadata",
+      "query": "TB_COUPON_REDEMPTION COUPON_NO DISCOUNT_AMOUNT REDEEMED_AT",
+      "expectedSources": ["dbo.TB_COUPON_REDEMPTION"]
+    },
+    {
+      "id": "customer-metadata",
+      "query": "TB_CUSTOMER CUST_NO CUST_NAME EMAIL_ADDR",
+      "expectedSources": ["dbo.TB_CUSTOMER"]
+    },
+    {
+      "id": "appointment-mapper-confirmation",
+      "query": "AppointmentMapper confirm bay appointment",
+      "expectedSources": ["portfolio-data/app/resources/mapper/AppointmentMapper.xml#confirm"]
+    },
+    {
+      "id": "repair-order-service",
+      "query": "RepairOrderService complete repair order status",
+      "expectedSources": ["portfolio-data/app/java/com/acme/svc/repairorder/RepairOrderService.java"]
+    },
+    {
+      "id": "inventory-service",
+      "query": "InventoryService issue part inventory stock",
+      "expectedSources": ["portfolio-data/app/java/com/acme/svc/inventory/InventoryService.java"]
+    },
+    {
+      "id": "coupon-service",
+      "query": "CouponService redeem coupon discount",
+      "expectedSources": ["portfolio-data/app/java/com/acme/svc/payment/CouponService.java"]
+    },
+    {
+      "id": "service-history-loading",
+      "query": "USP_LOAD_SERVICE_HISTORY service date summary vehicle",
+      "expectedSources": ["portfolio-data/procedures/dbo.USP_LOAD_SERVICE_HISTORY.sql"]
+    },
+    {
+      "id": "purchase-order-creation",
+      "query": "USP_CREATE_PART_PURCHASE_ORDER supplier parts inventory",
+      "expectedSources": ["portfolio-data/procedures/dbo.USP_CREATE_PART_PURCHASE_ORDER.sql"]
+    }
+  ]
+}

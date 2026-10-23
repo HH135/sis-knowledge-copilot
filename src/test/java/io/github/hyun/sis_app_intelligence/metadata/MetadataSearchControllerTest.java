@@ -40,7 +40,7 @@ class MetadataSearchControllerTest {
                 });
         when(repository.searchProcedures(anyString(), anyString(), anyString(), anyBoolean(), anyInt()))
                 .thenReturn(List.of(new ProcedureSearchItem("ACME_SVC", "dbo", "USP_REDEEM_COUPON",
-                        "쿠폰 사용", "portfolio-data/procedures/dbo.USP_REDEEM_COUPON.sql", "name")));
+                        "쿠폰 사용", "portfolio-data/procedures/dbo.USP_REDEEM_COUPON.sql", "OK", "name")));
 
         mockMvc = standaloneSetup(new MetadataSearchController(new MetadataSearchService(repository))).build();
     }
@@ -59,6 +59,7 @@ class MetadataSearchControllerTest {
                 .andExpect(jsonPath("$.query").value("COUPON"))
                 .andExpect(jsonPath("$.count").value(1))
                 .andExpect(jsonPath("$.items[0].matchedIn").value("name"))
+                .andExpect(jsonPath("$.items[0].definitionStatus").value("OK"))
                 .andExpect(jsonPath("$.items[0].definition").doesNotExist());
     }
 

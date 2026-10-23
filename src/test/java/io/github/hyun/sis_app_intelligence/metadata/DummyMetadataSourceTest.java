@@ -38,6 +38,8 @@ class DummyMetadataSourceTest {
         assertTrue(snapshot.procedures().stream()
                 .allMatch(procedure -> procedure.sourceRef().startsWith("portfolio-data/procedures/dbo.USP_")
                         && procedure.sourceRef().endsWith(".sql")));
+        assertTrue(snapshot.procedures().stream()
+                .allMatch(procedure -> "OK".equals(procedure.definitionStatus())));
 
         Set<String> columnNames = snapshot.tables().stream()
                 .flatMap(table -> table.columns().stream())

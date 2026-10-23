@@ -1,0 +1,11 @@
+app.source.root=
+app.source.allowed-extensions=java,jsp,xml,sql,properties,ini
+app.source.excluded-dirs=.git,target,node_modules,.svn
+app.source.max-file-bytes=2097152
+app.source.fallback-charset=MS949
+# app.source.charset-overrides[legacy/Example.java]=UTF-8
+app.mssql.url=${MSSQL_URL:}
+app.mssql.username=${MSSQL_USERNAME:}
+app.mssql.password=${MSSQL_PASSWORD:}
+app.mssql.login-timeout-seconds=10
+app.mssql.query-timeout-seconds=60

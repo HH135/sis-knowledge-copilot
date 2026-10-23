@@ -2,10 +2,10 @@
 
 ## Current State
 
-- Java 21, Spring Boot 4.1.1, Maven, Thymeleaf home page (`/`) and its tests are in place.
-- The current application packages are `io.github.hyun.sis_app_intelligence` and `controller`. Database integration, collectors, metadata adapters, RAG, and MCP are not implemented yet.
-- The app currently uses Thymeleaf, Validation, and WebMVC dependencies. JPA and PostgreSQL dependencies were previously removed to keep the app web-only.
-- The immediate implementation boundary is **Day 1, Task 1 only**: save this plan, add PostgreSQL/JDBC configuration and the initial schema, verify startup/tests, then stop. Do not begin any later task.
+- Java 21, Spring Boot 4.1.1, Maven, PostgreSQL/JDBC persistence, fictional portfolio fixtures, source collection, metadata search/sync, RAG, call-tree analysis, and MCP tools are implemented.
+- `internal` and `portfolio` profiles keep external SIS metadata/source access separate from committed fictional fixtures. External AI is disabled by default.
+- The 20-question retrieval evaluator and MCP server implementation are in place. Database-backed evaluation scores and successful MCP data calls remain pending because the local PostgreSQL/Docker engine is unavailable; tests target `sis_app_test`.
+- Current work follows the remaining plan items and verification; the Day 1 order below is retained as the original implementation sequence.
 
 ## MVP Goal and Security Modes
 
@@ -139,10 +139,10 @@ The vector extension and `document_vector` belong only in `src/main/resources/db
 - **2a fixtures:** `src/main/resources/portfolio-data/tables.json` defines the format and 20 fictional tables. Add 3-5 explicitly marked intentional discrepancies for later spec comparison.
 - **2b procedures:** 15-20 fictional procedures under `src/main/resources/portfolio-data/procedures/`, with consistent names and some `EXEC` calls for later parsing.
 - **2c source fixtures:** 30-50 fictional Java/JSP/XML files in the same fictional domain; no SIS-derived content.
-- **Task 4:** `MetadataSourcePort` and `DummyMetadataSource` only. Do not add MSSQL dependencies or beans. Internal mode must fail explicitly until its real adapter is added.
+- **Task 4:** `MetadataSourcePort` and `DummyMetadataSource` provide the fictional portfolio snapshot. The internal profile uses `MssqlMetadataSource` after Task 4b; missing source configuration must fail explicitly.
 - **Task 5 APIs:** `GET /api/metadata/columns?q=...` and `GET /api/metadata/procedures?q=...`, using parameterized SQL and tests.
 - **Task 3 file scanning:** only `.java`, `.jsp`, `.xml`, `.sql`, `.properties`, `.ini`; external root configured outside the repo; path/symlink escape denied; source files are never modified. Preserve charset override with BOM detection, UTF-8 validation, and configurable MS949/EUC-KR fallback. Do not schedule scans.
-- **Task 4b MSSQL:** allow SELECT only from `sys.schemas`, `sys.tables`, `sys.columns`, `sys.types`, `sys.procedures`, `sys.sql_modules`, and optional `sys.extended_properties`. A NULL procedure definition is persisted with status `definition 접근 불가`; do not invent source text. Read-only is enforced by the MSSQL account's server permissions, not by `Connection.setReadOnly`. Create a separate MSSQL `DataSource` and `JdbcTemplate` bean only under `internal`; never replace or alter the primary PostgreSQL datasource. Add `mssql-jdbc` only in task 4b. Test with mocks, not the company SQL Server.
+- **Task 4b MSSQL:** allow SELECT only from `sys.schemas`, `sys.tables`, `sys.columns`, `sys.types`, `sys.procedures`, `sys.sql_modules`, and `sys.extended_properties`. A NULL procedure definition is persisted with status `NO_ACCESS`; do not invent source text. Read-only is enforced by a dedicated MSSQL account's `db_datareader` and `VIEW DEFINITION` permissions, not by `Connection.setReadOnly`. Construct a private MSSQL `SimpleDriverDataSource` and `JdbcTemplate` inside `MssqlMetadataSource` only when sync is called; do not register MSSQL connection beans or alter the primary PostgreSQL datasource. Add the Boot-managed `mssql-jdbc` runtime dependency. Test with mocks only; never use internal production data for automated tests.
 
 ## Spring AI Compatibility Notes
 
@@ -157,15 +157,20 @@ References: [Spring AI Getting Started](https://docs.spring.io/spring-ai/referen
 
 ### Day 2
 
-Create `AiAnalysisPort` and `MockAiAnalysisAdapter`; chunk Java/JSP by source unit and procedures by procedure block while preserving citation metadata. Use pgvector only for portfolio data, with DDL isolated in `schema-vector.sql`. Test Spring AI dependencies against Boot 4.1.1 before adopting the starter. Until an approved provider and credential exist, do not claim real semantic embeddings; preserve the Mock/port seam.
+`AiAnalysisPort` and deterministic Mock adapters are implemented. Java/JSP, mapper statements, stored procedures, and tables have chunking strategies that preserve source references; portfolio-only rebuild and similar-search endpoints use the isolated vector schema. An opt-in Gemini embedding adapter uses Spring `RestClient` without an external AI call unless explicitly enabled. Its REST request shape is covered by tests; a live provider call remains unverified.
 
 ### Day 3
 
-Implement `RagQueryService` with source citations. Internal uses PostgreSQL lexical search and no model call; portfolio uses vector retrieval and Mock or an approved API. Add a bounded `EXEC`/`EXECUTE` parser and call-tree query. Add a versioned 20-question fixture with expected sources and a reproducible Hit@k/Recall@k report.
+RAG retrieval, citations, and bounded procedure call-tree support are implemented. The internal profile uses lexical retrieval without an AI model call; portfolio uses Mock/approved adapters. A versioned 20-question fixture and repeatable Hit@5/Recall@5 evaluator are present.
+
+The retrieval evaluation is implemented in `src/test/java/io/github/hyun/sis_app_intelligence/rag/RetrievalEvaluationTest.java` with fixture `src/test/resources/rag/retrieval-evaluation-v1.json`. See `docs/RAG_EVALUATION.md` for the isolated run command and metric definitions.
+The fixture test passes; aggregate retrieval scores have not yet been produced because PostgreSQL is unavailable.
 
 ### Day 4
 
 Expose only `search_columns`, `get_procedure_source`, and `get_call_tree` as MCP tools. Validate tool inputs and prohibit arbitrary SQL/filesystem access. Demonstrate tool calling with Mock until approved API access is available. Finish README and demo scenario.
+
+The portfolio-only Streamable HTTP server is implemented with Spring AI 2.0.0 and binds to `127.0.0.1`; its three read-only tools reuse the metadata and dependency services. Identifier and depth limits are validated before access. See the Portfolio MCP tools section in `README.md` for startup and client instructions. Dependency resolution and compilation were verified against Spring Boot 4.1.1; live database-backed client calls still require a running portfolio database.
 
 ### Documentation/Portfolio
 

@@ -106,7 +106,8 @@ public class DummyMetadataSource implements MetadataSourcePort {
                     header.group(2),
                     header.group(3).trim(),
                     definition,
-                    "portfolio-data/procedures/" + filename));
+                    "portfolio-data/procedures/" + filename,
+                    "OK"));
         }
         return List.copyOf(procedures);
     }

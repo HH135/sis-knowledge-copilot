@@ -42,6 +42,7 @@ class MetadataSyncIntegrationTest {
                 WHERE database_name = ?
                   AND description IS NOT NULL
                   AND source_ref LIKE 'portfolio-data/procedures/%.sql'
+                  AND definition_status = 'OK'
                 """,
                 Integer.class,
                 first.databaseName()));
