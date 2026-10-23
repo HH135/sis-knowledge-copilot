@@ -7,6 +7,8 @@ public class GeminiProperties {
 
     private String apiKey = "";
     private String embeddingModel = "gemini-embedding-001";
+    // 확인 필요: verify free-tier availability and lifecycle before production use.
+    private String chatModel = "gemini-2.5-flash";
     private int dimensions = 768;
     private int batchSize = 20;
     private long requestIntervalMs = 1500;
@@ -26,6 +28,14 @@ public class GeminiProperties {
 
     public void setEmbeddingModel(String embeddingModel) {
         this.embeddingModel = embeddingModel;
+    }
+
+    public String getChatModel() {
+        return chatModel;
+    }
+
+    public void setChatModel(String chatModel) {
+        this.chatModel = chatModel;
     }
 
     public int getDimensions() {

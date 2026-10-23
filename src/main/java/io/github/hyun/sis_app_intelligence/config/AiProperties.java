@@ -13,11 +13,11 @@ public class AiProperties {
     }
 
     public void setProvider(String provider) {
-        if (!"mock".equalsIgnoreCase(provider)) {
+        if (!"mock".equalsIgnoreCase(provider) && !"gemini".equalsIgnoreCase(provider)) {
             throw new IllegalStateException(
-                    "Unsupported app.ai.provider '" + provider + "'. Only 'mock' is currently supported.");
+                    "Unsupported app.ai.provider '" + provider + "'. Supported values are 'mock' and 'gemini'.");
         }
-        this.provider = provider;
+        this.provider = provider.toLowerCase(java.util.Locale.ROOT);
     }
 
     public boolean isExternalEnabled() {

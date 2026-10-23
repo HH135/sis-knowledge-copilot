@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.MapPropertySource;
 
 import io.github.hyun.sis_app_intelligence.config.AiProperties;
+import io.github.hyun.sis_app_intelligence.config.GeminiProperties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -64,7 +65,45 @@ class AiConfigTest {
 
             RuntimeException exception = assertThrows(RuntimeException.class, context::refresh);
             assertTrue(rootCause(exception).getMessage().contains(
-                    "Unsupported app.ai.provider 'vendor'. Only 'mock' is currently supported."));
+                    "Unsupported app.ai.provider 'vendor'. Supported values are 'mock' and 'gemini'."));
+        }
+    }
+
+    @Test
+    void geminiProviderIsRejectedInInternalProfileAndWithoutPortfolioApiKey() {
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+            context.getEnvironment().setActiveProfiles("internal");
+            context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
+                    "test", Map.of("app.ai.provider", "gemini", "app.ai.external-enabled", "true")));
+            context.register(GeminiGuardConfiguration.class);
+            IllegalStateException exception = assertThrows(IllegalStateException.class, context::refresh);
+            assertTrue(exception.getMessage().contains("prohibited"));
+        }
+
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+            context.getEnvironment().setActiveProfiles("portfolio");
+            context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
+                    "test", Map.of("app.ai.provider", "gemini", "app.ai.external-enabled", "true")));
+            context.register(GeminiGuardConfiguration.class);
+            IllegalStateException exception = assertThrows(IllegalStateException.class, context::refresh);
+            assertTrue(exception.getMessage().contains("api-key"));
+        }
+    }
+
+    @Test
+    void geminiAdapterIsSelectedOnlyWithPortfolioOptInAndKey() {
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+            context.getEnvironment().setActiveProfiles("portfolio");
+            context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
+                    "test", Map.of(
+                            "app.ai.provider", "gemini",
+                            "app.ai.external-enabled", "true",
+                            "app.ai.gemini.api-key", "test-key")));
+            context.register(GeminiProviderConfiguration.class);
+            context.refresh();
+
+            assertTrue(context.getBean(AiAnalysisPort.class).sendsDataExternally());
+            assertEquals("gemini", context.getBean(AiAnalysisPort.class).providerName());
         }
     }
 
@@ -121,5 +160,17 @@ class AiConfigTest {
                 }
             };
         }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableConfigurationProperties(AiProperties.class)
+    @Import(AiConfig.class)
+    static class GeminiGuardConfiguration {
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableConfigurationProperties({AiProperties.class, GeminiProperties.class})
+    @Import({AiConfig.class, GeminiAnalysisConfiguration.class})
+    static class GeminiProviderConfiguration {
     }
 }

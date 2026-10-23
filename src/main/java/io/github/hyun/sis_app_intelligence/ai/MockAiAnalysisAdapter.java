@@ -3,9 +3,11 @@ package io.github.hyun.sis_app_intelligence.ai;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(name = "app.ai.provider", havingValue = "mock", matchIfMissing = true)
 public class MockAiAnalysisAdapter implements AiAnalysisPort {
 
     @Override

@@ -73,19 +73,32 @@ public class ChunkEmbeddingRepository {
     }
 
     public List<SimilarChunk> findSimilar(float[] queryVector, int limit) {
+        return findSimilar("portfolio", queryVector, limit);
+    }
+
+    public List<SimilarChunk> findSimilar(String origin, float[] queryVector, int limit) {
+        return findSimilar(origin, queryVector, limit, true);
+    }
+
+    public List<SimilarChunk> findSimilarForRetrieval(String origin, float[] queryVector, int limit) {
+        return findSimilar(origin, queryVector, limit, false);
+    }
+
+    private List<SimilarChunk> findSimilar(String origin, float[] queryVector, int limit, boolean truncateContent) {
+        String contentSelection = truncateContent ? "left(c.content, 200) AS content" : "c.content";
         return jdbcTemplate.query("""
                 SELECT c.id AS chunk_id, c.source_kind, c.title, c.source_ref,
                        c.start_line, c.end_line,
                        1 - (e.embedding <=> ?::vector) AS score,
-                       left(c.content, 200) AS content
+                       %s
                 FROM chunk_embedding e
                 JOIN document_chunk c ON c.id = e.chunk_id
-                WHERE c.origin = 'portfolio'
+                WHERE c.origin = ?
                   AND e.dimensions = ?
                 ORDER BY e.embedding <=> ?::vector
                 LIMIT ?
-                """, SIMILAR_CHUNK_ROW_MAPPER,
-                vectorLiteral(queryVector), queryVector.length, vectorLiteral(queryVector), limit);
+                """.formatted(contentSelection), SIMILAR_CHUNK_ROW_MAPPER,
+                vectorLiteral(queryVector), origin, queryVector.length, vectorLiteral(queryVector), limit);
     }
 
     private String vectorLiteral(float[] vector) {

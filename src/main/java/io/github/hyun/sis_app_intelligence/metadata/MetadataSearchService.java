@@ -1,6 +1,9 @@
 package io.github.hyun.sis_app_intelligence.metadata;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
@@ -10,6 +13,7 @@ public class MetadataSearchService {
     private static final int DEFAULT_LIMIT = 50;
     private static final int MAX_LIMIT = 200;
     private static final int MAX_QUERY_LENGTH = 100;
+    private static final Pattern SQL_IDENTIFIER = Pattern.compile("[A-Za-z_][A-Za-z0-9_]{0,127}");
 
     private final MetadataSearchRepository metadataSearchRepository;
 
@@ -36,6 +40,12 @@ public class MetadataSearchService {
         return new SearchResponse<>(normalizedQuery, items);
     }
 
+    public Optional<ProcedureSource> findProcedureSource(String schemaName, String procedureName) {
+        validateIdentifier(schemaName, "schema");
+        validateIdentifier(procedureName, "procedure");
+        return metadataSearchRepository.findProcedureSource(schemaName, procedureName);
+    }
+
     private String normalizeQuery(String query) {
         if (query == null || query.isBlank()) {
             throw new MetadataSearchValidationException("QUERY_REQUIRED");
@@ -58,5 +68,11 @@ public class MetadataSearchService {
 
     private String normalizeTable(String table) {
         return table == null || table.isBlank() ? null : table.trim();
+    }
+
+    private void validateIdentifier(String value, String field) {
+        if (value == null || !SQL_IDENTIFIER.matcher(value).matches()) {
+            throw new MetadataSearchValidationException("INVALID_" + field.toUpperCase(Locale.ROOT));
+        }
     }
 }

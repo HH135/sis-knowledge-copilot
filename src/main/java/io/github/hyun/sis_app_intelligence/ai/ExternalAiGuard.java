@@ -1,6 +1,7 @@
 package io.github.hyun.sis_app_intelligence.ai;
 
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.env.Environment;
 
 import io.github.hyun.sis_app_intelligence.config.AiProperties;
@@ -8,12 +9,12 @@ import io.github.hyun.sis_app_intelligence.config.AiProperties;
 public class ExternalAiGuard implements SmartInitializingSingleton {
 
     private final Environment environment;
-    private final AiAnalysisPort aiAnalysisPort;
+    private final ObjectProvider<AiAnalysisPort> aiAnalysisPort;
     private final AiProperties properties;
 
     public ExternalAiGuard(
             Environment environment,
-            AiAnalysisPort aiAnalysisPort,
+            ObjectProvider<AiAnalysisPort> aiAnalysisPort,
             AiProperties properties) {
         this.environment = environment;
         this.aiAnalysisPort = aiAnalysisPort;
@@ -22,7 +23,8 @@ public class ExternalAiGuard implements SmartInitializingSingleton {
 
     @Override
     public void afterSingletonsInstantiated() {
-        if (!aiAnalysisPort.sendsDataExternally()) {
+        AiAnalysisPort adapter = aiAnalysisPort.getIfAvailable();
+        if (adapter == null || !adapter.sendsDataExternally()) {
             return;
         }
         if (environment.matchesProfiles("internal")) {

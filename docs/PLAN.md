@@ -2,10 +2,10 @@
 
 ## Current State
 
-- Java 21, Spring Boot 4.1.1, Maven, Thymeleaf home page (`/`) and its tests are in place.
-- The current application packages are `io.github.hyun.sis_app_intelligence` and `controller`. Database integration, collectors, metadata adapters, RAG, and MCP are not implemented yet.
-- The app currently uses Thymeleaf, Validation, and WebMVC dependencies. JPA and PostgreSQL dependencies were previously removed to keep the app web-only.
-- The immediate implementation boundary is **Day 1, Task 1 only**: save this plan, add PostgreSQL/JDBC configuration and the initial schema, verify startup/tests, then stop. Do not begin any later task.
+- Java 21, Spring Boot 4.1.1, Maven, PostgreSQL/JDBC persistence, fictional portfolio fixtures, source collection, metadata search/sync, RAG, call-tree analysis, and MCP tools are implemented.
+- `internal` and `portfolio` profiles keep external SIS metadata/source access separate from committed fictional fixtures. External AI is disabled by default.
+- The 20-question retrieval evaluator and MCP server implementation are in place. Database-backed evaluation scores and successful MCP data calls remain pending because the local PostgreSQL/Docker engine is unavailable; tests target `sis_app_test`.
+- Current work follows the remaining plan items and verification; the Day 1 order below is retained as the original implementation sequence.
 
 ## MVP Goal and Security Modes
 
@@ -157,17 +157,20 @@ References: [Spring AI Getting Started](https://docs.spring.io/spring-ai/referen
 
 ### Day 2
 
-`AiAnalysisPort` and `MockAiAnalysisAdapter` are implemented. The embedding task adds a deterministic 768-dimensional Mock adapter and an opt-in Google Gemini adapter using Spring `RestClient` (no Spring AI dependency). Portfolio-only `schema-vector.sql` contains the `document_chunk` prerequisite, `chunk_embedding`, and cosine HNSW index; internal/default profiles do not load vector DDL. Rebuild and similar-search endpoints are portfolio-only. No chunking workflow or RAG answer generation is included yet. Gemini request fields are nested under `embedContentConfig` per the official REST schema; a live provider call remains unverified.
-
-Next Day 2 work: chunk Java/JSP by source unit and procedures by procedure block while preserving citation metadata, then connect chunk creation to embeddings.
+`AiAnalysisPort` and deterministic Mock adapters are implemented. Java/JSP, mapper statements, stored procedures, and tables have chunking strategies that preserve source references; portfolio-only rebuild and similar-search endpoints use the isolated vector schema. An opt-in Gemini embedding adapter uses Spring `RestClient` without an external AI call unless explicitly enabled. Its REST request shape is covered by tests; a live provider call remains unverified.
 
 ### Day 3
 
-Implement `RagQueryService` with source citations. Internal uses PostgreSQL lexical search and no model call; portfolio uses vector retrieval and Mock or an approved API. Add a bounded `EXEC`/`EXECUTE` parser and call-tree query. Add a versioned 20-question fixture with expected sources and a reproducible Hit@k/Recall@k report.
+RAG retrieval, citations, and bounded procedure call-tree support are implemented. The internal profile uses lexical retrieval without an AI model call; portfolio uses Mock/approved adapters. A versioned 20-question fixture and repeatable Hit@5/Recall@5 evaluator are present.
+
+The retrieval evaluation is implemented in `src/test/java/io/github/hyun/sis_app_intelligence/rag/RetrievalEvaluationTest.java` with fixture `src/test/resources/rag/retrieval-evaluation-v1.json`. See `docs/RAG_EVALUATION.md` for the isolated run command and metric definitions.
+The fixture test passes; aggregate retrieval scores have not yet been produced because PostgreSQL is unavailable.
 
 ### Day 4
 
 Expose only `search_columns`, `get_procedure_source`, and `get_call_tree` as MCP tools. Validate tool inputs and prohibit arbitrary SQL/filesystem access. Demonstrate tool calling with Mock until approved API access is available. Finish README and demo scenario.
+
+The portfolio-only Streamable HTTP server is implemented with Spring AI 2.0.0 and binds to `127.0.0.1`; its three read-only tools reuse the metadata and dependency services. Identifier and depth limits are validated before access. See the Portfolio MCP tools section in `README.md` for startup and client instructions. Dependency resolution and compilation were verified against Spring Boot 4.1.1; live database-backed client calls still require a running portfolio database.
 
 ### Documentation/Portfolio
 
