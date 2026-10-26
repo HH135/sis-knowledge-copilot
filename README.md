@@ -1,5 +1,11 @@
 # SIS App Intelligence
 
+## Project overview
+
+SIS App Intelligence is a Java 21 and Spring Boot 4.1.1 portfolio MVP for searching SIS-style source and metadata, retrieving cited context, tracing stored-procedure calls, and exposing a small read-only MCP toolset. PostgreSQL stores metadata, source chunks, and portfolio embeddings. The code follows controller, service, repository, and entity boundaries.
+
+The `portfolio` profile uses only fictional Acme Motors Service fixtures. The `internal` profile is separate and requires explicitly configured source and SQL Server access. Do not use real SIS data for the portfolio demo.
+
 ## Integration test database
 
 Automated tests use the `sis_app_test` database in the same PostgreSQL container as the application, never the development database. The test profile fixes the database name; `POSTGRES_TEST_HOST`, `POSTGRES_TEST_PORT`, `POSTGRES_TEST_USER`, and `POSTGRES_TEST_PASSWORD` can configure the test connection. The test startup initializes the regular schema and `schema-vector.sql`, which enables pgvector in the test database.
@@ -20,6 +26,27 @@ CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
 Run `CREATE DATABASE` only when the preceding query returns no rows. If the Compose PostgreSQL user was customized, use that role in the connection and as the database owner. Then run the usual test command, for example `.\mvnw.cmd test`.
+
+## Portfolio demo walkthrough
+
+Use the isolated `sis_app_test` database and the `portfolio` profile. Configure the application's PostgreSQL connection with local environment variables, set `SPRING_PROFILES_ACTIVE=portfolio`, and keep `APP_AI_PROVIDER=mock` and `APP_AI_EXTERNAL_ENABLED=false`. Do not point the portfolio demo at an internal or development database.
+
+Start the app with `.\mvnw.cmd spring-boot:run`, then prepare and explore the fictional data:
+
+```powershell
+curl.exe -X POST http://127.0.0.1:8080/api/metadata/sync
+curl.exe -X POST http://127.0.0.1:8080/api/source-files/scan
+curl.exe -X POST http://127.0.0.1:8080/api/chunks/rebuild
+curl.exe -X POST http://127.0.0.1:8080/api/embeddings/rebuild
+curl.exe -X POST http://127.0.0.1:8080/api/dependencies/rebuild
+curl.exe "http://127.0.0.1:8080/api/metadata/columns?q=repair&limit=5"
+curl.exe -X POST http://127.0.0.1:8080/api/rag/ask -H "Content-Type: application/json" -d '{"question":"How is a repair order completed?","k":5}'
+curl.exe "http://127.0.0.1:8080/api/dependencies/call-tree?procedure=dbo.USP_COMPLETE_REPAIR_ORDER&depth=5"
+```
+
+For the MCP segment, connect a Streamable HTTP client to `http://127.0.0.1:8080/mcp` and invoke `search_columns`, `get_procedure_source`, and `get_call_tree`. The HTTP server binds to loopback and has no built-in authentication; do not expose it on a network interface. This walkthrough demonstrates direct API and MCP calls with Mock/local behavior; it does not claim a model-driven tool-calling agent demo.
+
+The retrieval fixture command and current baseline are documented in [`docs/RAG_EVALUATION.md`](docs/RAG_EVALUATION.md). The fixture includes one known miss; Mock token-hash embeddings are lexical demo vectors, not semantic embeddings.
 
 ## MSSQL metadata source (draft)
 

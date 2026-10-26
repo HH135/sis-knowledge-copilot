@@ -4,8 +4,9 @@
 
 - Java 21, Spring Boot 4.1.1, Maven, PostgreSQL/JDBC persistence, fictional portfolio fixtures, source collection, metadata search/sync, RAG, call-tree analysis, and MCP tools are implemented.
 - `internal` and `portfolio` profiles keep external SIS metadata/source access separate from committed fictional fixtures. External AI is disabled by default.
-- The 20-question retrieval evaluator and MCP server implementation are in place. Database-backed evaluation scores and successful MCP data calls remain pending because the local PostgreSQL/Docker engine is unavailable; tests target `sis_app_test`.
-- Current work follows the remaining plan items and verification; the Day 1 order below is retained as the original implementation sequence.
+- The 20-question retrieval evaluator and MCP server implementation are in place. The isolated `sis_app_test` evaluation baseline is Hit@5 0.950 / Recall@5 0.950 for fixture 1.0.0 with deterministic Mock embeddings; three MCP tools have been exercised through Streamable HTTP with fictional portfolio data.
+- The README now includes a portfolio API/MCP walkthrough. Remaining portfolio work is a model-driven tool-calling demo and an optional recorded video; the spec-vs-metadata discrepancy report is not implemented.
+- The Day 1 order below is retained as the original implementation sequence, not as a list of current tasks.
 
 ## MVP Goal and Security Modes
 
@@ -164,20 +165,21 @@ References: [Spring AI Getting Started](https://docs.spring.io/spring-ai/referen
 RAG retrieval, citations, and bounded procedure call-tree support are implemented. The internal profile uses lexical retrieval without an AI model call; portfolio uses Mock/approved adapters. A versioned 20-question fixture and repeatable Hit@5/Recall@5 evaluator are present.
 
 The retrieval evaluation is implemented in `src/test/java/io/github/hyun/sis_app_intelligence/rag/RetrievalEvaluationTest.java` with fixture `src/test/resources/rag/retrieval-evaluation-v1.json`. See `docs/RAG_EVALUATION.md` for the isolated run command and metric definitions.
-The fixture test passes; aggregate retrieval scores have not yet been produced because PostgreSQL is unavailable.
+Recorded baseline: macro Hit@5 0.950 / Recall@5 0.950 (19/20 questions hit) against `sis_app_test` using fixture 1.0.0 and `mock-token-hash-768`. `repair-order-service` is the one miss; its expected source ranks 12th in FTS and 11th in vector retrieval. This is a deterministic lexical-demo baseline, not a semantic-embedding quality target. See `docs/RAG_EVALUATION.md`.
 
-### Day 4
+### Day 4 — MCP and demo
 
 Expose only `search_columns`, `get_procedure_source`, and `get_call_tree` as MCP tools. Validate tool inputs and prohibit arbitrary SQL/filesystem access. Demonstrate tool calling with Mock until approved API access is available. Finish README and demo scenario.
 
-The portfolio-only Streamable HTTP server is implemented with Spring AI 2.0.0 and binds to `127.0.0.1`; its three read-only tools reuse the metadata and dependency services. Identifier and depth limits are validated before access. See the Portfolio MCP tools section in `README.md` for startup and client instructions. Dependency resolution and compilation were verified against Spring Boot 4.1.1; live database-backed client calls still require a running portfolio database.
+**MCP implementation and live tool calls: complete.** The portfolio-only Streamable HTTP server is implemented with Spring AI 2.0.0 and binds to `127.0.0.1`; its three read-only tools reuse the metadata and dependency services. Identifier and depth limits are validated before access. The tools were exercised through a Streamable HTTP client against fictional portfolio data in `sis_app_test`. Dependency resolution and compilation were verified against Spring Boot 4.1.1.
+
+**Demo: partial.** `README.md` contains a direct API/MCP walkthrough. A model-driven tool-calling demo is not implemented or verified, and no demo video has been recorded.
 
 ### Documentation/Portfolio
 
-- DOCX discrepancy MVP: manually normalized CSV/JSON spec compared with collected table/column metadata; report missing/extra table/column and type/description mismatch. Avoid Apache POI and automatic DOCX parsing in the critical path.
-- README sections: project, modes/security boundary, architecture, versions/compatibility status, local DB setup, profiles/secrets, dummy fixtures, endpoints/curl, RAG evaluation, MCP demo, limitations.
-- Video: portfolio search, cited RAG result, call tree, three MCP tools, and evidence that internal mode makes no external AI calls. Do not show real sources or secrets.
-- Interview topics: data isolation, chunk provenance, FTS versus vector retrieval, AI port replacement, MCP tool input/permission limits.
+- **Not implemented:** discrepancy report comparing a manually normalized CSV/JSON specification with collected metadata for missing/extra tables and columns and type/description mismatches. `table-spec.json` and `EXPECTED_DIFF.md` only document four fictional differences; they are fixtures, not a comparison implementation. Avoid Apache POI and automatic DOCX parsing in the critical path.
+- **README: partial.** Architecture, profile/security boundary, local test database setup, endpoints, RAG evaluation, MCP usage, limitations, and a direct API/MCP walkthrough are documented. A model-driven tool-calling demo remains outstanding.
+- **Optional presentation work:** record the portfolio search, cited RAG result, call tree, and three MCP tools. Use only fictional sources and show that internal mode makes no external AI calls. Prepare interview notes on data isolation, chunk provenance, FTS versus vector retrieval, AI port replacement, and MCP tool input/permission limits.
 
 ## Task 1 Verification Commands
 
