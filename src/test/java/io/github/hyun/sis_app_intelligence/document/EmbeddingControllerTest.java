@@ -21,12 +21,12 @@ class EmbeddingControllerTest {
     void rebuildReturnsEmbeddingResult() throws Exception {
         EmbeddingService service = mock(EmbeddingService.class);
         when(service.rebuild(false)).thenReturn(new EmbeddingResult(
-                "mock-sha256-768", 768, 2, 2, 0, 1, 0, 8, null));
+                "mock-token-hash-768", 768, 2, 2, 0, 1, 0, 8, null));
         MockMvc mockMvc = standaloneSetup(new EmbeddingController(service)).build();
 
         mockMvc.perform(post("/api/embeddings/rebuild"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.model").value("mock-sha256-768"))
+                .andExpect(jsonPath("$.model").value("mock-token-hash-768"))
                 .andExpect(jsonPath("$.dimensions").value(768))
                 .andExpect(jsonPath("$.embedded").value(2));
     }

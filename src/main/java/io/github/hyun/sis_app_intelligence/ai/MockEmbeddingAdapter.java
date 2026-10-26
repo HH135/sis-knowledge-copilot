@@ -1,11 +1,7 @@
 package io.github.hyun.sis_app_intelligence.ai;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -28,7 +24,7 @@ public class MockEmbeddingAdapter implements EmbeddingPort {
 
     @Override
     public String modelName() {
-        return "mock-sha256-768";
+        return "mock-token-hash-768";
     }
 
     @Override
@@ -43,23 +39,14 @@ public class MockEmbeddingAdapter implements EmbeddingPort {
 
     private float[] vectorFor(String text) {
         float[] vector = new float[DIMENSIONS];
-        byte[] input = text.getBytes(StandardCharsets.UTF_8);
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            int offset = 0;
-            int counter = 0;
-            while (offset < DIMENSIONS) {
-                digest.update(input);
-                byte[] block = digest.digest(ByteBuffer.allocate(Integer.BYTES).putInt(counter++).array());
-                for (int index = 0; index + Float.BYTES <= block.length && offset < DIMENSIONS; index += Float.BYTES) {
-                    int bits = ByteBuffer.wrap(block, index, Float.BYTES).getInt();
-                    vector[offset++] = (bits / (float) Integer.MAX_VALUE);
-                }
+        for (String token : text.toLowerCase(Locale.ROOT).split("[^\\p{L}\\p{N}_]+")) {
+            if (token.isEmpty()) {
+                continue;
             }
-            return EmbeddingVector.normalize(vector, DIMENSIONS);
+            int hash = token.hashCode();
+            int index = Math.floorMod(hash, DIMENSIONS);
+            vector[index] += (Integer.bitCount(hash) & 1) == 0 ? 1 : -1;
         }
-        catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException("SHA-256 is not available.", exception);
-        }
+        return EmbeddingVector.normalize(vector, DIMENSIONS);
     }
 }
