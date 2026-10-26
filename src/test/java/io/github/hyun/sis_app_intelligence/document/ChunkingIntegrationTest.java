@@ -65,7 +65,7 @@ class ChunkingIntegrationTest {
                 "SELECT id FROM document_chunk WHERE origin = 'portfolio' LIMIT 1", Long.class);
         jdbcTemplate.update("""
                 INSERT INTO chunk_embedding (chunk_id, model, dimensions, content_sha256, embedding)
-                VALUES (?, 'mock-sha256-768', 768, ?, ?::vector)
+                VALUES (?, 'mock-token-hash-768', 768, ?, ?::vector)
                 """, embeddedChunkId, "0".repeat(64), zeroVector(768));
 
         ChunkResult second = chunkingService.rebuild();

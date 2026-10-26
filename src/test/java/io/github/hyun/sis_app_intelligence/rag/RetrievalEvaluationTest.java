@@ -60,6 +60,12 @@ class RetrievalEvaluationTest {
     private EmbeddingService embeddingService;
 
     @Autowired
+    private FtsRetriever ftsRetriever;
+
+    @Autowired
+    private VectorRetriever vectorRetriever;
+
+    @Autowired
     private HybridRetriever hybridRetriever;
 
     @Test
@@ -94,6 +100,18 @@ class RetrievalEvaluationTest {
             totalRecall += recall;
             System.out.printf(Locale.ROOT, "%s Hit@%d=%.3f Recall@%d=%.3f%n",
                     question.id(), TOP_K, hit, TOP_K, recall);
+            if (hit == 0) {
+                System.out.printf(Locale.ROOT, "  expected=%s retrieved=%s%n",
+                        question.expectedSources(),
+                        results.stream().map(RetrievedChunk::sourceRef).toList());
+                System.out.printf(Locale.ROOT, "  fts=%s vector=%s%n",
+                        ftsRetriever.retrieve("portfolio", question.query()).stream()
+                                .filter(chunk -> question.expectedSources().contains(chunk.sourceRef()))
+                                .map(RetrievedChunk::ftsRank).toList(),
+                        vectorRetriever.retrieve("portfolio", question.query()).stream()
+                                .filter(chunk -> question.expectedSources().contains(chunk.sourceRef()))
+                                .map(RetrievedChunk::vectorRank).toList());
+            }
         }
 
         System.out.printf(Locale.ROOT, "Macro Hit@%d=%.3f Recall@%d=%.3f questions=%d fixture=%s%n",
